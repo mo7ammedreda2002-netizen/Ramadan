@@ -3,17 +3,472 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خطة رمضان </title>
-    <link rel="stylesheet" href="style.css">
+    <title>خطة رمضان - المطور</title>
     <!-- استيراد مكتبة الرسم البياني -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- استيراد الأيقونات -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- استيراد خط Cairo المميز -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --emerald-900: #064e3b;
+            --emerald-700: #047857;
+            --emerald-500: #10b981;
+            --blue-600: #2563eb;
+            --amber-500: #f59e0b;
+            --rose-600: #e11d48;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-800: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--slate-50);
+            color: var(--slate-800);
+            padding-bottom: 50px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid var(--slate-200);
+        }
+
+        header {
+            background: linear-gradient(to right, var(--emerald-900), var(--emerald-700));
+            padding: 25px 30px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        /* زر الإعدادات */
+        .settings-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .settings-btn:hover { background: rgba(255, 255, 255, 0.3); transform: rotate(15deg); }
+
+        .header-content h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .header-content p { font-weight: 500; opacity: 0.9; }
+
+        .icon-yellow { color: #facc15; fill: #facc15; }
+
+        nav {
+            background: rgba(0,0,0,0.2);
+            padding: 6px;
+            border-radius: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'Cairo', sans-serif;
+            transition: 0.3s;
+        }
+
+        nav button.active {
+            background: white;
+            color: var(--emerald-900);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        main { padding: 20px; }
+        
+        @media (min-width: 768px) {
+            main { padding: 35px; }
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Table Styling */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 20px;
+            border: 1px solid var(--slate-200);
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 600px;
+        }
+
+        th, td {
+            padding: 18px 15px;
+            text-align: center;
+            border-bottom: 1px solid var(--slate-100);
+            white-space: nowrap;
+        }
+
+        th { 
+            background-color: #f8fafc; 
+            color: #475569; 
+            font-weight: 800; 
+            font-size: 0.95rem;
+        }
+
+        .section-divider {
+            background-color: #f1f5f9;
+            text-align: right;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--emerald-700);
+            letter-spacing: 0.5px;
+        }
+
+        .checkbox-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 2px solid var(--slate-200);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            color: transparent;
+        }
+        
+        .checkbox-btn:hover { border-color: var(--emerald-500); transform: scale(1.05); }
+
+        .checkbox-btn.checked-quran { background: var(--emerald-500); color: white; border-color: var(--emerald-500); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); }
+        .checkbox-btn.checked-other { background: var(--blue-600); color: white; border-color: var(--blue-600); box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3); }
+
+        .footer-row { background: var(--slate-800); color: white; font-weight: 800; }
+
+        /* Status Card */
+        .daily-status-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 24px;
+            padding: 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .zap-info { display: flex; gap: 15px; align-items: center; }
+        .zap-icon { background: rgba(250, 204, 21, 0.15); padding: 12px; border-radius: 16px; color: #facc15; }
+        .zap-info h4 { font-weight: 800; margin-bottom: 5px; }
+
+        .daily-stats { display: flex; gap: 20px; }
+        .stat-item { text-align: center; padding: 0 20px; border-left: 1px solid rgba(255,255,255,0.1); }
+        .stat-value { display: block; font-size: 1.8rem; font-weight: 900; line-height: 1.2; }
+        .highlight { color: var(--emerald-400); }
+
+        /* Progress Tab Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .grid-card {
+            padding: 25px 20px;
+            border-radius: 24px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .grid-card:hover { transform: translateY(-5px); }
+
+        .grid-card.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .grid-card.indigo { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        .grid-card.amber { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .grid-card.emerald { background: linear-gradient(135deg, #10b981, #059669); }
+        
+        .grid-card .label { display: block; font-size: 0.9rem; opacity: 0.9; margin-top: 10px; font-weight: 600; }
+        .grid-card .value { display: block; font-size: 1.6rem; font-weight: 900; margin-top: 5px; }
+
+        .smart-status-card {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid var(--slate-200);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .smart-status-card h2 { font-weight: 900; font-size: 1.8rem; margin-bottom: 10px; }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 14px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            margin: 25px 0;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--emerald-500);
+            border-radius: 20px;
+            transition: width 1s ease;
+        }
+
+        .extra-stats { display: flex; justify-content: center; gap: 40px; margin-top: 25px; flex-wrap: wrap; }
+        .extra-stats span { display: block; font-size: 2rem; font-weight: 900; color: var(--slate-800); }
+        .extra-stats small { color: #64748b; font-weight: 600; }
+        .divider { width: 1px; background: var(--slate-200); height: 50px; }
+
+        /* Reflections */
+        .reflection-section {
+            background: white;
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid var(--slate-200);
+        }
+
+        .forms-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        @media (min-width: 768px) { .forms-grid { grid-template-columns: 1fr 1fr; } }
+        
+        .input-group label { display: block; margin-bottom: 10px; font-weight: 700; color: var(--slate-800); display: flex; align-items: center; gap: 8px; }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border-radius: 16px;
+            border: 2px solid var(--slate-100);
+            background: var(--slate-50);
+            resize: none;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+        textarea:focus { outline: none; border-color: var(--blue-600); background: white; }
+
+        /* تنسيقات المودال (النافذة المنبثقة للإعدادات) */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.6); 
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .close-modal {
+            color: #94a3b8;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .close-modal:hover { color: var(--rose-600); }
+
+        .settings-section { margin-bottom: 30px; }
+        .settings-section h3 { margin-bottom: 20px; color: var(--slate-800); border-bottom: 2px solid var(--slate-100); padding-bottom: 10px; font-weight: 800; }
+        
+        /* تصميم قائمة العادات القابلة للتعديل */
+        .editable-habit-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .habit-name-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 2px solid var(--slate-200);
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .habit-name-input:focus { border-color: var(--blue-600); outline: none; }
+
+        .delete-habit-btn {
+            background: #fee2e2;
+            color: var(--rose-600);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .delete-habit-btn:hover { background: var(--rose-600); color: white; }
+
+        .add-habit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #eff6ff;
+            color: var(--blue-600);
+            border: 2px dashed #bfdbfe;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .add-habit-btn:hover { background: #dbeafe; border-color: var(--blue-600); }
+
+        .setting-input {
+            width: 80px;
+            padding: 10px;
+            border-radius: 12px;
+            border: 2px solid var(--slate-200);
+            text-align: center;
+            font-weight: bold;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--emerald-700);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: 800;
+            font-family: 'Cairo', sans-serif;
+            transition: 0.2s;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+        }
+        .save-btn:hover { background: var(--emerald-900); transform: translateY(-2px); }
+
+        .khatma-info {
+            font-size: 0.95rem;
+            color: var(--emerald-800);
+            background: #ecfdf5;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border-right: 4px solid var(--emerald-500);
+            font-weight: 600;
+        }
+        
+        /* تنسيق أزرار النسخ الاحتياطي */
+        .backup-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .backup-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .btn-download { background: #f8fafc; border: 1px solid #e2e8f0; color: var(--slate-800); }
+        .btn-download:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        
+        .btn-upload { background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; }
+        .btn-upload:hover { background: #e0f2fe; border-color: #7dd3fc; }
+        
+        #fileInput { display: none; }
+    </style>
 </head>
 <body>
     <div class="container">
         <!-- الهيدر -->
         <header>
+            <button class="settings-btn" onclick="openSettings()" title="الإعدادات">
+                <i data-lucide="sliders-horizontal"></i>
+            </button>
             <div class="header-content">
                 <h1><i data-lucide="moon" class="icon-yellow"></i> خطة رمضان</h1>
                 <p>نظام التقييم الذاتي المطور</p>
@@ -70,8 +525,8 @@
 
                 <!-- الرسم البياني -->
                 <div class="chart-section">
-                    <h3><i data-lucide="bar-chart-3"></i> منحنى الالتزام اليومي</h3>
-                    <div class="canvas-container">
+                    <h3 style="margin-bottom: 20px; font-weight: 800;"><i data-lucide="bar-chart-3"></i> منحنى الالتزام اليومي</h3>
+                    <div class="canvas-container" style="height: 300px;">
                         <canvas id="performanceChart"></canvas>
                     </div>
                 </div>
@@ -83,7 +538,7 @@
                     <div class="grid-card blue">
                         <i data-lucide="target"></i>
                         <span class="label">الهدف</span>
-                        <span class="value">5 ختمات</span>
+                        <span class="value" id="target-khatmas-display">5 ختمات</span>
                     </div>
                     <div class="grid-card indigo">
                         <i data-lucide="trending-up"></i>
@@ -93,7 +548,7 @@
                     <div class="grid-card amber">
                         <i data-lucide="sun"></i>
                         <span class="label">اليومي</span>
-                        <span class="value">5 أجزاء</span>
+                        <span class="value" id="daily-pages-display">4 صفحات</span>
                     </div>
                     <div class="grid-card emerald">
                         <i data-lucide="book-open"></i>
@@ -116,15 +571,15 @@
                         </div>
                         <div class="divider"></div>
                         <div>
-                            <span id="remaining-quran">35</span>
-                            <small>جزء متبقي للأسبوع</small>
+                            <span id="remaining-quran">30</span>
+                            <small>جزء متبقي</small>
                         </div>
                     </div>
                 </div>
 
                 <!-- المراجعة الأسبوعية -->
                 <div class="reflection-section">
-                    <h3><i data-lucide="pencil-line"></i> مساحة المراجعة الأسبوعية</h3>
+                    <h3 style="margin-bottom: 20px; font-weight: 800;"><i data-lucide="pencil-line"></i> مساحة المراجعة الأسبوعية</h3>
                     <div class="forms-grid">
                         <div class="input-group">
                             <label><i data-lucide="message-square"></i> لماذا كان الأسبوع قوياً أو ضعيفاً؟</label>
@@ -140,10 +595,474 @@
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <!-- نافذة الإعدادات -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSettings()">&times;</span>
+            <h2 style="font-weight: 900; margin-bottom: 20px;"><i data-lucide="sliders-horizontal"></i> إعدادات الخطة</h2>
+            
+            <!-- إعدادات الختمات -->
+            <div class="settings-section">
+                <h3>القرآن الكريم</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <label style="font-weight: 700;">كم ختمة تريد في رمضان؟</label>
+                    <input type="number" id="khatmaInput" class="setting-input" min="1" max="10" value="1" onchange="calcPagesPreview()">
+                </div>
+                <div id="khatmaPreview" class="khatma-info">
+                    لتحقيق 1 ختمة، ستقرأ 4 صفحات بعد كل صلاة.
+                </div>
+            </div>
+
+            <!-- إعدادات العبادات الأخرى -->
+            <div class="settings-section">
+                <h3>تخصيص جدول العبادات</h3>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">عدل المسميات أو أضف عاداتك الخاصة (مثلاً: تراويح، قراءة كتاب، صدقة...)</p>
+                
+                <div id="habitsListContainer">
+                    <!-- سيتم توليد القائمة هنا بواسطة JS -->
+                </div>
+                
+                <button class="add-habit-btn" onclick="addNewHabitRow()">
+                    <i data-lucide="plus"></i> إضافة عادة جديدة
+                </button>
+            </div>
+
+            <!-- إعدادات النسخ الاحتياطي -->
+            <div class="settings-section">
+                <h3>نسخ احتياطي واستعادة</h3>
+                <p style="font-size: 0.85rem; color: #64748b;">التطبيق يحفظ البيانات تلقائياً على هذا الجهاز. لنقل بياناتك لجهاز آخر، استخدم الأزرار أدناه.</p>
+                <div class="backup-actions">
+                    <button class="backup-btn btn-download" onclick="exportData()">
+                        <i data-lucide="download"></i> حفظ ملف
+                    </button>
+                    <button class="backup-btn btn-upload" onclick="document.getElementById('fileInput').click()">
+                        <i data-lucide="upload"></i> استعادة ملف
+                    </button>
+                    <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
+                </div>
+            </div>
+
+            <button class="save-btn" onclick="saveSettings()">حفظ التغييرات</button>
+        </div>
+    </div>
+
     <script>
-        // تفعيل الأيقونات بعد تحميل الصفحة
-        lucide.createIcons();
+        // --- 1. إعدادات البيانات والتهيئة ---
+        
+        // البيانات الأساسية
+        let appData = JSON.parse(localStorage.getItem('ramadanAppData')) || Array.from({ length: 30 }, (_, i) => ({
+            day: i + 1
+            // العبادات ستضاف ديناميكياً
+        }));
+
+        // إعدادات المستخدم (عدد الختمات)
+        let userConfig = JSON.parse(localStorage.getItem('ramadanUserConfig')) || {
+            targetKhatmas: 1
+        };
+
+        // قائمة العبادات المخصصة
+        let customHabits = JSON.parse(localStorage.getItem('ramadanCustomHabits')) || [
+            { id: 'h_qiyam', label: 'قيام الليل' },
+            { id: 'h_prayers', label: 'الصلوات في وقتها' },
+            { id: 'h_sunnah', label: 'السنن الرواتب' },
+            { id: 'h_dhikr', label: 'أذكار يومية' },
+            { id: 'h_selfControl', label: 'ضبط النفس' }
+        ];
+
+        const quranHabits = [
+            { key: 'fajr', label: 'بعد الفجر' },
+            { key: 'dhuhr', label: 'بعد الظهر' },
+            { key: 'asr', label: 'بعد العصر' },
+            { key: 'maghrib', label: 'بعد المغرب' },
+            { key: 'isha', label: 'بعد العشاء' },
+        ];
+
+        let myChart = null;
+
+        // --- 2. وظائف الإعدادات (Modal Logic) ---
+
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = "block";
+            
+            // تعيين الختمات
+            document.getElementById('khatmaInput').value = userConfig.targetKhatmas;
+            calcPagesPreview();
+
+            // رسم قائمة العبادات للتعديل
+            renderSettingsHabitsList();
+            
+            lucide.createIcons();
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = "none";
+        }
+
+        function renderSettingsHabitsList() {
+            const container = document.getElementById('habitsListContainer');
+            container.innerHTML = ''; // تفريغ القائمة
+
+            customHabits.forEach((habit, index) => {
+                const div = document.createElement('div');
+                div.className = 'editable-habit-row';
+                div.innerHTML = `
+                    <input type="text" class="habit-name-input" value="${habit.label}" id="habit-input-${index}" placeholder="اسم العادة...">
+                    <button class="delete-habit-btn" onclick="deleteHabitRow(${index})">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        function addNewHabitRow() {
+            customHabits.push({ id: `h_${Date.now()}`, label: 'عبادة جديدة' });
+            renderSettingsHabitsList();
+        }
+
+        function deleteHabitRow(index) {
+            if (confirm("هل أنت متأكد من حذف هذه العادة؟")) {
+                customHabits.splice(index, 1);
+                renderSettingsHabitsList();
+            }
+        }
+
+        function calcPagesPreview() {
+            const k = document.getElementById('khatmaInput').value;
+            const pagesPerDay = (604 * k) / 30;
+            const pagesPerPrayer = Math.ceil(pagesPerDay / 5);
+            document.getElementById('khatmaPreview').innerText = 
+                `لتحقيق ${k} ختمة، ستقرأ ${pagesPerPrayer} صفحات تقريباً بعد كل صلاة.`;
+        }
+
+        function saveSettings() {
+            userConfig.targetKhatmas = parseInt(document.getElementById('khatmaInput').value) || 1;
+
+            const inputs = document.querySelectorAll('.habit-name-input');
+            inputs.forEach((input, index) => {
+                if (customHabits[index]) {
+                    customHabits[index].label = input.value;
+                }
+            });
+
+            customHabits = customHabits.filter(h => h.label.trim() !== "");
+
+            localStorage.setItem('ramadanUserConfig', JSON.stringify(userConfig));
+            localStorage.setItem('ramadanCustomHabits', JSON.stringify(customHabits));
+            
+            closeSettings();
+            initTable();
+            updateProgress();
+        }
+
+        // --- وظائف النسخ الاحتياطي (جديد) ---
+        function exportData() {
+            const data = {
+                appData: appData,
+                userConfig: userConfig,
+                customHabits: customHabits,
+                noteReason: localStorage.getItem('noteReason') || '',
+                noteEval: localStorage.getItem('noteEval') || ''
+            };
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "ramadan_plan_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.appData && data.userConfig) {
+                        appData = data.appData;
+                        userConfig = data.userConfig;
+                        customHabits = data.customHabits || customHabits;
+                        
+                        localStorage.setItem('ramadanAppData', JSON.stringify(appData));
+                        localStorage.setItem('ramadanUserConfig', JSON.stringify(userConfig));
+                        localStorage.setItem('ramadanCustomHabits', JSON.stringify(customHabits));
+                        if(data.noteReason) localStorage.setItem('noteReason', data.noteReason);
+                        if(data.noteEval) localStorage.setItem('noteEval', data.noteEval);
+
+                        alert("تم استعادة البيانات بنجاح!");
+                        location.reload(); // إعادة تحميل الصفحة لتطبيق البيانات
+                    } else {
+                        alert("عفواً، ملف البيانات غير صالح.");
+                    }
+                } catch (error) {
+                    alert("حدث خطأ أثناء قراءة الملف.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('settingsModal');
+            if (event.target == modal) closeSettings();
+        }
+
+        // --- 3. وظائف الجدول والمنطق الأساسي ---
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            document.getElementById(`btn-${tabName}`).classList.add('active');
+            
+            if (tabName === 'progress') updateProgress();
+        }
+
+        function initTable() {
+            const headerRow = document.getElementById('table-header');
+            const tableBody = document.getElementById('table-body');
+            const footerRow = document.getElementById('table-footer');
+
+            headerRow.innerHTML = '<th>العبادات اليومية</th>';
+            tableBody.innerHTML = '';
+            footerRow.innerHTML = '<td>مجموع النقاط</td>';
+
+            const daysToShow = appData.slice(0, 7);
+            
+            daysToShow.forEach(d => {
+                const th = document.createElement('th');
+                th.innerText = `يوم ${d.day}`;
+                headerRow.appendChild(th);
+            });
+
+            const pagesPerDay = (604 * userConfig.targetKhatmas) / 30;
+            const pagesPerPrayer = Math.ceil(pagesPerDay / 5);
+
+            const quranHeader = document.createElement('tr');
+            quranHeader.className = 'section-divider';
+            quranHeader.innerHTML = `<td colspan="${daysToShow.length + 1}">ورد القرآن الكريم (${pagesPerPrayer} صفحات لكل صلاة)</td>`;
+            tableBody.appendChild(quranHeader);
+
+            const dynamicQuranHabits = quranHabits.map(h => ({
+                ...h,
+                displayLabel: `${h.label} (${pagesPerPrayer} ص)`
+            }));
+
+            renderHabitRows(dynamicQuranHabits, 'quran', tableBody, daysToShow);
+
+            if (customHabits.length > 0) {
+                const otherHeader = document.createElement('tr');
+                otherHeader.className = 'section-divider';
+                otherHeader.innerHTML = `<td colspan="${daysToShow.length + 1}" style="color: #2563eb">بروتوكول الانضباط والعبادات</td>`;
+                tableBody.appendChild(otherHeader);
+                
+                renderHabitRows(customHabits, 'other', tableBody, daysToShow);
+            }
+
+            updateTotals();
+            initChart();
+            lucide.createIcons();
+        }
+
+        function renderHabitRows(habits, type, parent, daysSlice) {
+            habits.forEach(habit => {
+                const habitKey = habit.id || habit.key;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${habit.displayLabel || habit.label}</td>`;
+                
+                daysSlice.forEach((day, index) => {
+                    const realIndex = day.day - 1;
+                    const td = document.createElement('td');
+                    const btn = document.createElement('button');
+                    btn.className = 'checkbox-btn';
+                    
+                    const isChecked = appData[realIndex][habitKey] === true;
+
+                    if (isChecked) {
+                        btn.classList.add(type === 'quran' ? 'checked-quran' : 'checked-other');
+                        btn.innerHTML = '<i data-lucide="check"></i>';
+                        btn.style.color = "white";
+                    } else {
+                        btn.innerHTML = '<i data-lucide="check"></i>';
+                    }
+
+                    btn.onclick = () => toggleCheck(realIndex, habitKey, btn, type);
+                    td.appendChild(btn);
+                    tr.appendChild(td);
+                });
+                parent.appendChild(tr);
+            });
+        }
+
+        function toggleCheck(dayIndex, key, btn, type) {
+            const currentVal = appData[dayIndex][key] === true;
+            appData[dayIndex][key] = !currentVal;
+            
+            localStorage.setItem('ramadanAppData', JSON.stringify(appData));
+
+            if (appData[dayIndex][key]) {
+                btn.classList.add(type === 'quran' ? 'checked-quran' : 'checked-other');
+                btn.style.color = "white"; 
+            } else {
+                btn.classList.remove('checked-quran', 'checked-other');
+                btn.style.color = "transparent"; 
+            }
+            
+            lucide.createIcons();
+            updateTotals();
+            updateChart();
+            updateDailyAnalysis();
+        }
+
+        function updateTotals() {
+            const footerRow = document.getElementById('table-footer');
+            while (footerRow.cells.length > 1) footerRow.deleteCell(1);
+
+            const daysToShow = appData.slice(0, 7); 
+            const activeKeys = [...quranHabits.map(h=>h.key), ...customHabits.map(h=>h.id)];
+
+            daysToShow.forEach(day => {
+                const total = activeKeys.reduce((sum, key) => sum + (day[key] ? 1 : 0), 0);
+                const td = document.createElement('td');
+                td.innerText = total;
+                if (total >= (activeKeys.length * 0.8)) td.style.color = '#10b981';
+                footerRow.appendChild(td);
+            });
+        }
+
+        function updateDailyAnalysis() {
+            const today = appData[0];
+            const activeKeys = [...quranHabits.map(h=>h.key), ...customHabits.map(h=>h.id)];
+            
+            const points = activeKeys.reduce((sum, key) => sum + (today[key] ? 1 : 0), 0);
+            const quran = quranHabits.reduce((sum, h) => sum + (today[h.key] ? 1 : 0), 0);
+
+            const pagesPerPrayer = Math.ceil(((604 * userConfig.targetKhatmas) / 30) / 5);
+            const pagesDone = quran * pagesPerPrayer;
+
+            document.getElementById('today-points').innerText = points;
+            document.getElementById('today-quran').innerText = pagesDone + " ص";
+            
+            const ratio = points / activeKeys.length;
+            let msg = 'بداية جيدة، استمر!';
+            if(ratio > 0.9) msg = 'أداء أسطوري! حافظ على هذا المستوى.';
+            else if(ratio < 0.5) msg = 'حاول تعويض ما فاتك، رمضان فرصة.';
+            
+            document.getElementById('daily-analysis-text').innerText = msg;
+        }
+
+        function updateProgress() {
+            const totalTargetPages = 604 * userConfig.targetKhatmas;
+            const pagesPerCheck = Math.ceil(((604 * userConfig.targetKhatmas) / 30) / 5);
+            
+            let totalChecks = 0;
+            appData.forEach(day => {
+                quranHabits.forEach(h => {
+                    if(day[h.key]) totalChecks++;
+                });
+            });
+
+            const pagesDone = totalChecks * pagesPerCheck;
+            const rate = totalTargetPages > 0 ? (pagesDone / totalTargetPages) * 100 : 0;
+            const khatmasDone = pagesDone / 604;
+
+            document.getElementById('target-khatmas-display').innerText = `${userConfig.targetKhatmas} ختمات`;
+            document.getElementById('daily-pages-display').innerText = `${pagesPerCheck * 5} صفحة/يوم`;
+            document.getElementById('total-quran-text').innerText = `${pagesDone} صفحة`;
+            document.getElementById('completion-rate-text').innerText = `${Math.round(rate)}%`;
+            document.getElementById('progress-fill').style.width = `${Math.min(rate, 100)}%`;
+            
+            document.getElementById('completed-khatmas').innerText = khatmasDone.toFixed(2);
+            document.getElementById('remaining-quran').innerText = Math.max(0, 30 - (pagesDone/20)).toFixed(0);
+
+            const statusLabel = document.getElementById('status-label');
+            const statusSub = document.getElementById('status-sub');
+            const fill = document.getElementById('progress-fill');
+            const expectedProgress = (1 / 30) * 100;
+
+            if (rate >= expectedProgress) {
+                statusLabel.innerText = "أداء مثالي! 🏆";
+                statusLabel.style.color = "#10b981";
+                statusSub.innerText = "أنت تسير وفق الخطة تماماً.";
+                fill.style.backgroundColor = "#10b981";
+            } else {
+                statusLabel.innerText = "تحتاج لزيادة الجهد 💪";
+                statusLabel.style.color = "#f59e0b";
+                statusSub.innerText = "أنت متأخر قليلاً عن الهدف.";
+                fill.style.backgroundColor = "#f59e0b";
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            const activeKeys = [...quranHabits.map(h=>h.key), ...customHabits.map(h=>h.id)];
+
+            if (myChart) myChart.destroy();
+            
+            Chart.defaults.font.family = "'Cairo', sans-serif";
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: appData.slice(0, 7).map(d => `يوم ${d.day}`),
+                    datasets: [{
+                        label: 'مجموع النقاط',
+                        data: appData.slice(0, 7).map(day => 
+                             activeKeys.reduce((sum, key) => sum + (day[key] ? 1 : 0), 0)
+                        ),
+                        borderColor: '#10b981',
+                        borderWidth: 4,
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#10b981',
+                        pointBorderWidth: 3,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: activeKeys.length + 2, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (myChart) {
+                const activeKeys = [...quranHabits.map(h=>h.key), ...customHabits.map(h=>h.id)];
+                myChart.data.datasets[0].data = appData.slice(0, 7).map(day => 
+                    activeKeys.reduce((sum, key) => sum + (day[key] ? 1 : 0), 0)
+                );
+                myChart.options.scales.y.max = activeKeys.length + 2;
+                myChart.update();
+            }
+        }
+
+        window.onload = function() {
+            initTable();
+            lucide.createIcons();
+            document.getElementById('note-reason').value = localStorage.getItem('noteReason') || '';
+            document.getElementById('note-eval').value = localStorage.getItem('noteEval') || '';
+        };
+
+        document.getElementById('note-reason').addEventListener('input', (e) => localStorage.setItem('noteReason', e.target.value));
+        document.getElementById('note-eval').addEventListener('input', (e) => localStorage.setItem('noteEval', e.target.value));
+
     </script>
 </body>
 </html>
